@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestión de proyectos · Ingeniería</title>
+<style>
+:root{--bg:#f2f4f3;--card:#fff;--ink:#16262b;--mut:#5d6e72;--line:#d8dfdd;--acc:#0b6a6a;--on:#fff;--warn:#d9a21b;--bad:#b73e2c;--ok:#2e7d50;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a1d;--card:#162326;--ink:#e5eeed;--mut:#90a3a7;--line:#2a3b3f;--acc:#44b8b2;--on:#08201f;--warn:#e2b64d;--bad:#e8826f;--ok:#6fc28f}}
+:root[data-theme="dark"]{--bg:#0f1a1d;--card:#162326;--ink:#e5eeed;--mut:#90a3a7;--line:#2a3b3f;--acc:#44b8b2;--on:#08201f;--warn:#e2b64d;--bad:#e8826f;--ok:#6fc28f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0;font-weight:700}
+nav{display:flex;gap:4px}
+button,select,input{font:inherit;color:inherit}
+nav button{background:none;border:0;padding:8px 14px;border-radius:6px;cursor:pointer;color:var(--mut);font-weight:600}
+nav button.on{background:var(--acc);color:var(--on)}
+.btn{background:var(--acc);color:var(--on);border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600}
+.btn.g{background:none;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+main{max-width:1200px;margin:0 auto;padding:16px 20px 40px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.bar select{padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);max-width:100%}
+.sp{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:13px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tfoot td{font-weight:700;border-bottom:0}
+.tag{padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.Vendida,.cobrada,.entregada,.entregado{color:var(--ok)}.Cotizada,.pendiente,.enproceso{color:var(--warn)}.Perdida,.vencida,.atrasada{color:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
+.kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums}.kpi span{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+h2{font-size:15px;margin:0 0 10px}
+.meter{height:6px;background:var(--line);border-radius:3px;min-width:80px}.meter i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.chart{display:flex;align-items:flex-end;gap:6px;height:200px;padding-top:8px;min-width:max-content}
+.col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;width:54px;font-size:12px;color:var(--mut)}
+.stk{display:flex;flex-direction:column-reverse;width:30px}
+.stk i{display:block}
+.leg{display:flex;gap:14px;font-size:13px;color:var(--mut);margin-bottom:6px;flex-wrap:wrap}.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:min(760px,96vw);max-height:92vh;padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+label{display:flex;flex-direction:column;font-size:13px;color:var(--mut);gap:3px}
+input,select,textarea{padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+textarea{height:240px;font:12px monospace}
+.empty{text-align:center;color:var(--mut);padding:30px}
+body.lim .full,body.lim .cu{display:none}
+</style></head><body>
+<header><h1>Gestión de proyectos · Ingeniería</h1>
+<nav id="nav"></nav>
+<div><button class="btn g full" onclick="openBk()">Respaldo</button> <button class="btn" onclick="openForm()">+ Nueva cotización</button></div></header>
+<main id="app"></main>
+
+<dialog id="dlg"><form method="dialog" onsubmit="return false">
+<h2 id="dt">Cotización / proyecto</h2>
+<div class="f">
+<label>Código<input id="f-code" placeholder="P-2026-014"></label>
+<label>Nombre del proyecto<input id="f-name"></label>
+<label>Cliente<input id="f-client" list="dl-c"></label>
+<label>Vendedor<input id="f-seller" list="dl-s"></label>
+<label>Moneda<select id="f-cur"><option value="UYU">$U (pesos)</option><option value="USD">U$S (dólares)</option><option value="UI">UI (unidades indexadas)</option></select></label>
+<label>Monto total (suma)<input id="f-amount" readonly></label>
+<label>Fecha de cotización<input id="f-qdate" type="date"></label>
+<label>Estado<select id="f-status" onchange="togSold()"><option>Cotizada</option><option>Vendida</option><option>Perdida</option></select></label>
+<label style="grid-column:1/-1">Comentarios<textarea id="f-notes" style="height:70px;font:inherit" placeholder="Notas internas, condiciones acordadas, contactos, etc."></textarea></label>
+</div>
+<h2 style="margin-top:16px">Monto por disciplina</h2><div class="scroll"><table><tbody id="items"></tbody></table></div><p><button type="button" class="btn g" onclick="items.push({d:'',a:0});drawItems()">+ Agregar disciplina</button></p><datalist id="dl-c"></datalist><datalist id="dl-s"></datalist><datalist id="dl-d"></datalist>
+<div id="sold" hidden>
+<h2 style="margin-top:16px">Alta de venta: plazo<span class="cu"> y cuotas de cobro</span></h2>
+<div class="f">
+<label>Fecha de venta<input id="f-sdate" type="date"></label>
+<label>Inicio de obra / servicio<input id="f-start" type="date"></label>
+<label>Plazo estimado (meses)<input id="f-months" type="number" min="1" value="3"></label>
+<label class="cu">Cantidad de cuotas<input id="f-n" type="number" min="1" value="3"></label>
+<label class="cu">Primera cuota<input id="f-first" type="date"></label>
+<label class="cu">Cada (meses)<input id="f-step" type="number" min="1" value="1"></label>
+</div>
+<p class="cu"><button type="button" class="btn g" onclick="gen()">Generar cuotas iguales</button> <span id="sum" style="color:var(--mut)"></span></p>
+<div class="scroll cu"><table><thead><tr><th>#</th><th>Vence</th><th class="n">Monto</th><th>Estado</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+<p class="cu"><button type="button" class="btn g" onclick="addRow()">+ Agregar cuota</button></p>
+<h2 style="margin-top:16px">Seguimiento de entregas (en paralelo a las cuotas)</h2>
+<div class="f"><label>Cantidad de entregas<input id="e-n" type="number" min="1" value="2"></label><label>Primera entrega<input id="e-first" type="date"></label><label>Cada (meses)<input id="e-step" type="number" min="1" value="1"></label></div>
+<p><button type="button" class="btn g" onclick="genE()">Generar entregas</button> <span style="color:var(--mut)">La entrega se marca como cumplida desde la pestaña Entregas.</span></p>
+<div class="scroll"><table><thead><tr><th>#</th><th>Descripción</th><th>Fecha prevista</th><th>Estado</th><th></th></tr></thead><tbody id="erows"></tbody></table></div>
+<p><button type="button" class="btn g" onclick="addE()">+ Agregar entrega</button></p>
+</div>
+<p style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:0">
+<button type="button" class="btn g" id="del" onclick="delPrj()" style="margin-right:auto;color:var(--bad)">Eliminar</button>
+<button type="button" class="btn g" onclick="dlg.close()">Cancelar</button>
+<button type="button" class="btn" onclick="saveForm()">Guardar</button></p>
+</form></dialog>
+
+<dialog id="adlg" style="width:min(420px,92vw)"><p id="amsg" style="margin-top:0"></p><p style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:0"><button class="btn g" id="acan" onclick="ansA(false)">Cancelar</button><button class="btn" onclick="ansA(true)">Aceptar</button></p></dialog>
+<dialog id="idlg"><h2>Importar desde Excel</h2><div id="ipv"></div><p style="display:flex;gap:8px;justify-content:flex-end"><button class="btn g" onclick="idlg.close()">Cancelar</button><button class="btn" id="iok" onclick="applyImp()">Importar</button></p></dialog>
+<dialog id="edlg"><h2>Entrega</h2><p id="einfo" style="color:var(--mut)"></p><div class="f"><label>Fecha de entrega real<input id="e-done" type="date"></label><label>Observaciones<input id="e-note"></label></div><p style="color:var(--mut);font-size:13px">Deje la fecha vacía si la entrega todavía no se realizó.</p><p style="display:flex;gap:8px;justify-content:flex-end"><button class="btn g" onclick="edlg.close()">Cancelar</button><button class="btn" onclick="saveEn()">Guardar</button></p></dialog>
+<dialog id="cdlg"><h2>Facturación y cobro</h2><p id="cinfo" style="color:var(--mut)"></p><div class="f"><label>Nº de factura<input id="c-no"></label><label>Fecha de factura<input id="c-idate" type="date"></label><label>Fecha de cobro<input id="c-pdate" type="date"></label></div><p style="color:var(--mut);font-size:13px">Complete la factura al emitirla. Deje la fecha de cobro vacía hasta que se cobre.</p><p style="display:flex;gap:8px;justify-content:flex-end"><button class="btn g" onclick="cdlg.close()">Cancelar</button><button class="btn" onclick="saveC()">Guardar</button></p></dialog>
+<dialog id="bk"><h2>Respaldo de datos</h2>
+<p style="color:var(--mut);margin-top:0">Los datos se guardan en la base compartida de esta página. Copie el JSON para respaldarlo o el CSV para abrirlo en Excel.</p>
+<textarea id="bt"></textarea>
+<p style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn g" onclick="bt.value=JSON.stringify(S,null,1)">Ver JSON</button><button class="btn g" onclick="bt.value=csv()">Ver CSV de cuotas</button><button class="btn g" onclick="imp()">Importar JSON pegado</button><button class="btn g" onclick="expX()">Exportar a Excel</button><button class="btn g" onclick="$('#xf').click()">Importar desde Excel</button><input type="file" id="xf" accept=".xlsx" hidden onchange="impX(this)"><button class="btn g" onclick="impLocal()">Traer datos locales</button><button class="btn g" onclick="demo()">Cargar ejemplo</button><span class="sp"></span><button class="btn" onclick="bk.close()">Cerrar</button></p></dialog>
+
+<script src="adapter.js"></script>
+<script>
+const K='ing-proyectos-v1';let S={projects:[]},DB=null,RO=false,LIM=false,PR={},CU={},EN={};
+try{const r=localStorage.getItem(K);if(r)S=JSON.parse(r)}catch(e){}
+S.rates??={USD:40,UI:6.5};S.rc=(()=>{try{return localStorage.getItem('ing-rc')}catch(e){return null}})()||'UYU';const norm=p=>{p.cur??='UYU';p.items??=[{d:p.discipline||'',a:p.amount}];return p};S.projects.forEach(p=>{norm(p);const{inst=[],ent=[],entrega,...pr}=p;PR[p.id]=pr;inst.forEach(c=>CU[c.id]={...c,pid:p.id});ent.forEach(c=>EN[c.id]={...c,pid:p.id})});
+const save=()=>{if(DB)return;try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),dlg=$('#dlg'),bk=$('#bk'),bt=$('#bt'),cdlg=$('#cdlg'),edlg=$('#edlg'),idlg=$('#idlg');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>new Intl.NumberFormat('es-UY',{maximumFractionDigits:0}).format(n||0);
+const today=new Date().toISOString().slice(0,10);
+const addM=(d,n)=>{const x=new Date(d+'T00:00:00Z');x.setUTCMonth(x.getUTCMonth()+n);return x.toISOString().slice(0,10)};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const DISC=['AT','DI','EX','MP','CD','CER','DNB','LC','OT','DO'],DN={AT:'Acondicionamiento Térmico',DI:'Detección de incendio',EX:'Extinción',MP:'Medidas Pasivas PCI',CD:'Corrientes Débiles (CCTV, AU, CE, CC, SE, etc.)',CER:'Certificaciones',LC:'Locales Comerciales',OT:'Otros (Gases Medicinales, Gas Combustible)',DO:'Dirección de Obra'},dn=c=>DN[c]?c+' - '+DN[c]:c;
+let view='proyectos',F={discipline:'',seller:'',client:'',status:'',entrega:''},cur=null,rows=[];
+const uniq=k=>[...new Set(S.projects.map(p=>p[k]).filter(Boolean))].sort();
+const discs=()=>[...new Set([...DISC,...uniq('discipline')])];
+const list=()=>S.projects.filter(p=>Object.keys(F).every(k=>!F[k]||(k==='discipline'?(p.items||[]).some(x=>x.d===F[k]):p[k]===F[k])));
+const sold=a=>a.filter(p=>p.status==='Vendida');
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const SY={UYU:'$U',USD:'U$S',UI:'UI'},R=c=>c==='UYU'?1:(S.rates[c]||1),conv=(v,c)=>v*R(c)/R(S.rc),fmtC=(v,c)=>SY[c]+' '+fmt(v);
+const share=p=>F.discipline&&p.amount?sum((p.items||[]).filter(x=>x.d===F.discipline),x=>x.a)/p.amount:1;
+const pa=p=>conv(p.amount*share(p),p.cur),ia=(p,i)=>conv(i.amount*share(p),p.cur);
+const cfg=()=>`<label style="flex-direction:row;align-items:center;gap:6px">Mostrar en<select onchange="setRc(this.value)">${['UYU','USD','UI'].map(c=>`<option value="${c}" ${S.rc===c?'selected':''}>${SY[c]}</option>`).join('')}</select></label>${['USD','UI'].map(c=>`<label style="flex-direction:row;align-items:center;gap:6px">1 ${SY[c]} = <input type="number" step="any" min="0" style="width:80px" value="${S.rates[c]}" ${LIM?'disabled ':''}onchange="setRate('${c}',this.value)"> $U</label>`).join('')}`;
+const istat=i=>i.paid?'cobrada':i.date<today?'vencida':'pendiente';
+const insts=a=>sold(a).flatMap(p=>(p.inst||[]).map(i=>({...i,p,amt:ia(p,i)})));
+const cobrado=p=>sum((p.inst||[]).filter(i=>i.paid),i=>ia(p,i));
+
+const fst=i=>i.paid?'cobrada':i.invDate?'facturada':'por facturar';
+const M=c=>c==='projects'?PR:c==='entregas'?EN:CU,NOPE=e=>QUIET?FAILS++:ask('No se pudo guardar el cambio ('+(e.code||e.message||'error')+'). Puede que su acceso sea de solo lectura.',1);
+function rebuild(){S.projects=Object.values(PR).map(p=>{const ent=Object.values(EN).filter(c=>c.pid===p.id).sort((a,b)=>a.date.localeCompare(b.date));return {...p,inst:Object.values(CU).filter(c=>c.pid===p.id).sort((a,b)=>a.date.localeCompare(b.date)),ent,entrega:p.status!=='Vendida'?'':!ent.length?'Sin entregas definidas':ent.every(e=>e.doneDate)?'Entregado':'En proceso'}});save();render()}
+async function wr(col,id,data){if(DB){try{const r=DB.doc(col+'/'+id);if(data)await r.set(data);else await r.delete()}catch(e){NOPE(e)}}else{if(data)M(col)[id]=data;else delete M(col)[id];rebuild()}}
+async function up(col,id,patch){if(DB){try{await DB.doc(col+'/'+id).update(patch)}catch(e){NOPE(e)}}else{Object.assign(M(col)[id],patch);rebuild()}}
+async function savePrj(p){const{inst=[],ent=[],entrega,...pr}=norm({...p});await wr('projects',p.id,pr);for(const c of inst)await wr('cuotas',c.id,{invNo:'',invDate:'',paidDate:'',...c,pid:p.id,paid:!!c.paid});for(const e of ent)await wr('entregas',e.id,{doneDate:'',note:'',...e,pid:p.id})}
+async function commitEnt(p,es,old){for(const o of old)if(!es.some(r=>r.id===o.id))await wr('entregas',o.id,null);for(const r of es){const o=EN[r.id];if(!o)await wr('entregas',r.id,{id:r.id,pid:p.id,name:r.name,date:r.date,doneDate:'',note:''});else if(o.date!==r.date||o.name!==r.name)await up('entregas',r.id,{date:r.date,name:r.name})}}
+async function commitForm(p,rs,es){const old=cur?cur.inst:[],olde=cur?cur.ent||[]:[];await wr('projects',p.id,p);await commitEnt(p,es,olde);for(const o of old)if(!rs.some(r=>r.id===o.id))await wr('cuotas',o.id,null);for(const r of rs){const o=CU[r.id],a=+r.amount||0;if(!o)await wr('cuotas',r.id,{id:r.id,pid:p.id,date:r.date,amount:a,invNo:'',invDate:'',paid:false,paidDate:''});else if(o.date!==r.date||o.amount!==a)await up('cuotas',r.id,{date:r.date,amount:a})}}
+function setRate(c,v){const r={...S.rates,[c]:+v||1};if(DB)DB.doc('config/rates').set(r).catch(NOPE);else{S.rates=r;save();render()}}
+function setRc(v){S.rc=v;try{localStorage.setItem('ing-rc',v)}catch(e){}render()}
+const adlg=$('#adlg');let _r=null;
+adlg.addEventListener('close',()=>{if(_r){const r=_r;_r=null;r(false)}});
+function ask(m,info){return new Promise(r=>{_r=r;$('#amsg').textContent=m;$('#acan').hidden=!!info;adlg.showModal()})}
+function ansA(v){const r=_r;_r=null;adlg.close();r&&r(v)}
+const est=e=>e.doneDate?'entregada':e.date<today?'atrasada':'pendiente';
+let erows=[],EC=null,ES='';
+function drawE(){$('#erows').innerHTML=erows.map((r,i)=>`<tr><td>${i+1}</td><td><input value="${esc(r.name)}" placeholder="Ej.: Entrega de planos" oninput="erows[${i}].name=this.value"></td><td><input type="date" value="${r.date}" onchange="erows[${i}].date=this.value"></td><td>${r.doneDate?'entregada '+r.doneDate:'pendiente'}</td><td><button type="button" class="btn g" onclick="erows.splice(${i},1);drawE()" aria-label="Quitar entrega">✕</button></td></tr>`).join('')}
+async function genE(){const n=Math.max(1,+$('#e-n').value||1),st=Math.max(1,+$('#e-step').value||1),f=$('#e-first').value||addM(today,1);if(erows.some(r=>r.doneDate)&&!await ask('Hay entregas ya cumplidas que se reemplazarán. ¿Continuar?'))return;erows=Array.from({length:n},(_,i)=>({id:uid(),name:'Entrega '+(i+1),date:addM(f,i*st),doneDate:''}));drawE()}
+function addE(){const l=erows[erows.length-1];erows.push({id:uid(),name:'Entrega '+(erows.length+1),date:l?addM(l.date,1):addM(today,1),doneDate:''});drawE()}
+function openE(pid,eid){const p=S.projects.find(x=>x.id===pid),e=p.ent.find(x=>x.id===eid);EC={eid};$('#einfo').textContent=`${p.code||''} ${p.name} · ${p.client} · ${e.name||'Entrega'} · prevista ${e.date}`;$('#e-done').value=e.doneDate||today;$('#e-note').value=e.note||'';edlg.showModal()}
+async function saveEn(){const d=$('#e-done').value,n=$('#e-note').value.trim();edlg.close();await up('entregas',EC.eid,{doneDate:d,note:n})}
+function vEnt(L){
+ const E=sold(L).flatMap(p=>(p.ent||[]).map(e=>({...e,p}))).sort((a,b)=>a.date.localeCompare(b.date));
+ if(!E.length)return `<div class="card empty">No hay entregas definidas. Defínalas al dar de alta una venta, en la sección “Seguimiento de entregas” del proyecto.</div>`;
+ const T={pendiente:e=>!e.doneDate,atrasada:e=>est(e)==='atrasada',entregada:e=>!!e.doneDate},R2=ES?E.filter(T[ES]):E;
+ const sel=`<div class="bar"><select aria-label="Estado de la entrega" onchange="ES=this.value;render()"><option value="">Entregas: todas</option>${[['pendiente','Pendientes'],['atrasada','Atrasadas'],['entregada','Entregadas']].map(([v,l])=>`<option value="${v}" ${ES===v?'selected':''}>${l}</option>`).join('')}</select></div>`;
+ return sel+`<div class="card scroll"><table><thead><tr><th>Fecha prevista</th><th>Proyecto</th><th>Cliente</th><th>Vendedor</th><th>Disciplina</th><th>Entrega</th><th>Estado</th><th>Entregada el</th><th>Observaciones</th><th>Proyecto</th><th></th></tr></thead><tbody>${R2.map(e=>`<tr><td>${e.date}</td><td>${esc(e.p.code)} ${esc(e.p.name)}</td><td>${esc(e.p.client)}</td><td>${esc(e.p.seller)}</td><td>${esc((e.p.items||[]).map(x=>x.d).join(', '))}</td><td>${esc(e.name)}</td><td><span class="tag ${est(e)}">${est(e)}</span></td><td>${e.doneDate||''}</td><td>${esc(e.note)}</td><td><span class="tag ${e.p.entrega.replace(/\s/g,'').toLowerCase()}">${e.p.entrega}</span></td><td><button class="btn g" onclick="openE('${e.p.id}','${e.id}')">${e.doneDate?'Editar':'Marcar entregada'}</button></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="11">${R2.length} entregas</td></tr></tfoot></table></div>`}
+/* ===== Importar / exportar Excel (.xlsx) sin librerías externas ===== */
+let QUIET=false,FAILS=0,IMP=null;
+const U16=(b,o)=>b[o]|b[o+1]<<8,U32=(b,o)=>(b[o]|b[o+1]<<8|b[o+2]<<16|b[o+3]<<24)>>>0;
+async function inflate(u8){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(ds.readable).arrayBuffer())}
+async function unzip(buf){const b=new Uint8Array(buf);let e=b.length-22;while(e>=0&&U32(b,e)!==0x06054b50)e--;if(e<0)throw new Error('el archivo no es un .xlsx válido');
+ const n=U16(b,e+10),td=new TextDecoder(),out={};let o=U32(b,e+16);
+ for(let i=0;i<n;i++){const m=U16(b,o+10),cs=U32(b,o+20),nl=U16(b,o+28),xl=U16(b,o+30),cl=U16(b,o+32),lo=U32(b,o+42),name=td.decode(b.subarray(o+46,o+46+nl));o+=46+nl+xl+cl;
+  const st=lo+30+U16(b,lo+26)+U16(b,lo+28),raw=b.subarray(st,st+cs);out[name]=async()=>td.decode(m===0?raw:await inflate(raw))}
+ return out}
+const xdec=s=>s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n)).replace(/&amp;/g,'&');
+const xcol=r=>{let n=0;for(const ch of r)n=n*26+ch.charCodeAt(0)-64;return n-1};
+const xtxt=s=>xdec([...s.matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/g)].map(x=>x[1]).join(''));
+async function readXlsx(buf){
+ const z=await unzip(buf),g=async n=>z[n]?await z[n]():'',res={};
+ const ss=[...(await g('xl/sharedStrings.xml')).matchAll(/<si\b[^>]*>([\s\S]*?)<\/si>/g)].map(m=>xtxt(m[1]));
+ const wb=await g('xl/workbook.xml'),rel=[...(await g('xl/_rels/workbook.xml.rels')).matchAll(/<Relationship\b[^>]*>/g)].map(x=>x[0]);
+ for(const m of wb.matchAll(/<sheet\b[^>]*>/g)){const a=m[0],name=xdec((a.match(/\bname="([^"]*)"/)||[])[1]||''),rid=(a.match(/\br:id="([^"]*)"/)||[])[1];
+  const rl=rel.find(x=>x.includes('Id="'+rid+'"'));let t=rl&&(rl.match(/\bTarget="([^"]*)"/)||[])[1];if(!t)continue;t=t.replace(/^\//,'');if(!t.startsWith('xl/'))t='xl/'+t;
+  const xml=await g(t),rows=[];
+  for(const rm of xml.matchAll(/<row\b[^>]*?(?:\/>|>([\s\S]*?)<\/row>)/g)){const row=[];
+   for(const c of(rm[1]||'').matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)){const at=c[1],body=c[2]||'',r=(at.match(/\br="([A-Z]+)\d+"/)||[])[1],ty=(at.match(/\bt="([^"]*)"/)||[])[1];if(!r)continue;
+    const vm=body.match(/<v>([\s\S]*?)<\/v>/);let v=null;
+    if(ty==='s'&&vm)v=ss[+vm[1]];else if(ty==='inlineStr')v=xtxt(body);else if(vm){if(ty==='str')v=xdec(vm[1]);else if(ty==='b')v=vm[1]==='1';else{v=+vm[1];if(isNaN(v))v=xdec(vm[1])}}
+    row[xcol(r)]=v}
+   rows.push(row)}
+  res[name]=rows}
+ return res}
+const nz=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const HP={codigo:['codigo','cod'],proyecto:['proyecto','nombre','nombre del proyecto'],cliente:['cliente'],vendedor:['vendedor'],moneda:['moneda'],estado:['estado'],qdate:['fecha cotizacion','fecha de cotizacion'],sdate:['fecha venta','fecha de venta'],start:['inicio','fecha inicio'],months:['plazo meses','plazo','plazo en meses'],notes:['comentarios','comentario']};
+const HC={codigo:['codigo proyecto','codigo','cod proyecto'],n:['n cuota','nro cuota','cuota'],date:['vence','vencimiento','fecha vencimiento','fecha de vencimiento'],amount:['monto','importe'],invNo:['n factura','nro factura','numero factura','factura'],invDate:['fecha factura','fecha de factura'],paidDate:['fecha cobro','fecha de cobro']};
+const HE={codigo:['codigo proyecto','codigo','cod proyecto'],name:['descripcion','entrega'],date:['fecha prevista','prevista'],doneDate:['fecha entrega real','fecha de entrega real','fecha entrega','fecha real'],note:['observaciones','observacion','comentarios']};
+const CURM={u:'UYU',uyu:'UYU',peso:'UYU',pesos:'UYU','pesos uruguayos':'UYU','u s':'USD',usd:'USD',us:'USD',dolar:'USD',dolares:'USD','dolares americanos':'USD',ui:'UI','unidades indexadas':'UI'};
+const STM={cotizada:'Cotizada',cotizado:'Cotizada',vendida:'Vendida',vendido:'Vendida',perdida:'Perdida',perdido:'Perdida'};
+const p2=n=>String(n).padStart(2,'0');
+const isoD=v=>{if(v==null||v==='')return '';if(typeof v==='number')return new Date(Date.UTC(1899,11,30)+Math.round(v*864e5)).toISOString().slice(0,10);
+ const s=String(v).trim();let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return m[1]+'-'+p2(m[2])+'-'+p2(m[3]);
+ m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);if(m)return(m[3].length===2?'20'+m[3]:m[3])+'-'+p2(m[2])+'-'+p2(m[1]);return null};
+const numX=v=>{if(v==null||v==='')return 0;if(typeof v==='number')return v;let t=String(v).replace(/\s/g,'');t=t.includes(',')&&t.includes('.')?t.replace(/\./g,'').replace(',','.'):t.replace(',','.');const n=Number(t);return isNaN(n)?NaN:n};
+async function pool(ts,n,cb){let i=0,d=0;await Promise.all(Array.from({length:n},async()=>{while(i<ts.length){const t=ts[i++];await t();cb&&cb(++d)}}))}
+async function planImport(file){
+ const wb=await readXlsx(await file.arrayBuffer()),errs=[],warns=[],sh=n=>{const k=Object.keys(wb).find(x=>nz(x)===nz(n));return k?wb[k]:null};
+ const W=s=>{if(!warns.includes(s))warns.push(s)},blank=r=>!r||!r.some(x=>x!=null&&String(x).trim()!=='');
+ const mapH=(rows,al)=>{const m={},ex=[];(rows[0]||[]).forEach((v,i)=>{const k=nz(v);if(!k)return;const key=Object.keys(al).find(a=>al[a].includes(k));if(key&&!(key in m))m[key]=i;else ex.push([String(v).trim().toUpperCase(),i])});return{m,ex}};
+ const P=sh('Proyectos');if(!P)throw new Error('no se encontró la hoja "Proyectos".');
+ const exist={};S.projects.forEach(p=>exist[nz(p.code)]=p);
+ const{m:pm,ex:dc}=mapH(P,HP);
+ for(const k of['codigo','proyecto','cliente','moneda','estado'])if(!(k in pm))throw new Error('en la hoja Proyectos falta la columna "'+k+'".');
+ if(!dc.length)throw new Error('en la hoja Proyectos no hay columnas de disciplinas (AT, DI, EX...).');
+ const items=new Map();
+ P.slice(1).forEach((r,i)=>{if(blank(r))return;const ln='Proyectos fila '+(i+2),g=k=>k in pm?r[pm[k]]:undefined,code=String(g('codigo')??'').trim(),key=nz(code);
+  if(!code){errs.push(ln+': falta el código.');return}
+  if(items.has(key)){errs.push(ln+': código repetido ('+code+').');return}
+  const name=String(g('proyecto')??'').trim(),client=String(g('cliente')??'').trim(),cur=CURM[nz(g('moneda'))],status=STM[nz(g('estado'))],e=[],D={};
+  if(!name)e.push('falta el nombre');if(!client)e.push('falta el cliente');if(!cur)e.push('moneda inválida (use $U, U$S o UI)');if(!status)e.push('estado inválido (Cotizada, Vendida o Perdida)');
+  for(const k of['qdate','sdate','start']){const v=isoD(g(k));if(v===null)e.push('fecha inválida ('+k+')');D[k]=v||''}
+  const mo=numX(g('months'));if(isNaN(mo))e.push('plazo inválido');
+  const its=[];for(const[d,ci]of dc){const a=numX(r[ci]);if(isNaN(a))e.push('monto inválido en '+d);else if(a>0)its.push({d,a})}
+  if(!its.length)e.push('sin montos por disciplina');
+  if(e.length){errs.push(ln+' ('+code+'): '+e.join('; ')+'.');return}
+  const old=exist[key],id=old?old.id:uid(),V=status==='Vendida';
+  items.set(key,{code,id,status,cuotas:null,ent:null,p:{id,code,name,client,seller:String(g('vendedor')??'').trim(),discipline:its[0].d,cur,items:its,amount:its.reduce((s,x)=>s+x.a,0),qdate:D.qdate,status,sdate:V?D.sdate:'',start:V?D.start:'',months:V?(mo||1):0,notes:String(g('notes')??'').trim()},isNew:!old});
+  if(V&&!D.sdate)W(ln+' ('+code+'): proyecto vendido sin fecha de venta.')});
+ const tgt=(code,ln)=>{const key=nz(code);let it=items.get(key);if(!it){const o=exist[key];if(!o){errs.push(ln+': el proyecto "'+code+'" no existe en el archivo ni en la base.');return null}it={code:o.code,id:o.id,status:o.status,cuotas:null,ent:null,p:null};items.set(key,it)}
+  if(it.status!=='Vendida'){W('El proyecto '+it.code+' no está en estado Vendida: sus cuotas y entregas se ignoran.');return null}return it};
+ let nC=0,nE=0;const C=sh('Cuotas'),E=sh('Entregas');
+ if(C){const{m}=mapH(C,HC);for(const k of['codigo','date','amount'])if(!(k in m))throw new Error('en la hoja Cuotas falta la columna "'+k+'".');
+  C.slice(1).forEach((r,i)=>{if(blank(r))return;const ln='Cuotas fila '+(i+2),g=k=>k in m?r[m[k]]:undefined,code=String(g('codigo')??'').trim();if(!code){errs.push(ln+': falta el código del proyecto.');return}
+   const it=tgt(code,ln);if(!it)return;const date=isoD(g('date')),amt=numX(g('amount')),inv=isoD(g('invDate')),pd=isoD(g('paidDate')),e=[];
+   if(!date)e.push('vencimiento inválido o vacío');if(isNaN(amt)||amt<=0)e.push('monto inválido');if(inv===null)e.push('fecha de factura inválida');if(pd===null)e.push('fecha de cobro inválida');if(pd&&!inv)e.push('tiene fecha de cobro pero no de factura');
+   if(e.length){errs.push(ln+' ('+code+'): '+e.join('; ')+'.');return}
+   (it.cuotas??=[]).push({id:uid(),pid:it.id,date,amount:amt,invNo:String(g('invNo')??'').trim(),invDate:inv||'',paidDate:pd||'',paid:!!pd});nC++})}
+ if(E){const{m}=mapH(E,HE);for(const k of['codigo','date'])if(!(k in m))throw new Error('en la hoja Entregas falta la columna "'+k+'".');
+  E.slice(1).forEach((r,i)=>{if(blank(r))return;const ln='Entregas fila '+(i+2),g=k=>k in m?r[m[k]]:undefined,code=String(g('codigo')??'').trim();if(!code){errs.push(ln+': falta el código del proyecto.');return}
+   const it=tgt(code,ln);if(!it)return;const date=isoD(g('date')),dd=isoD(g('doneDate')),e=[];
+   if(!date)e.push('fecha prevista inválida o vacía');if(dd===null)e.push('fecha de entrega real inválida');
+   if(e.length){errs.push(ln+' ('+code+'): '+e.join('; ')+'.');return}
+   (it.ent??=[]).push({id:uid(),pid:it.id,name:String(g('name')??'').trim()||'Entrega '+((it.ent||[]).length+1),date,doneDate:dd||'',note:String(g('note')??'').trim()});nE++})}
+ for(const it of items.values())if(it.cuotas){const am=it.p?it.p.amount:exist[nz(it.code)].amount;if(Math.abs(it.cuotas.reduce((s,c)=>s+c.amount,0)-am)>0.5)W('Proyecto '+it.code+': las cuotas no suman el monto total.')}
+ const L=[...items.values()];return{items:L,errs,warns,nNew:L.filter(x=>x.p&&x.isNew).length,nUpd:L.filter(x=>x.p&&!x.isNew).length,nC,nE}}
+function showPlan(){const pl=IMP,ul=a=>`<ul style="margin:6px 0;padding-left:18px;font-size:13px">${a.slice(0,25).map(x=>`<li>${esc(x)}</li>`).join('')}${a.length>25?`<li>… y ${a.length-25} más</li>`:''}</ul>`;
+ $('#ipv').innerHTML=`<p>Proyectos nuevos: <b>${pl.nNew}</b> · a actualizar (mismo código): <b>${pl.nUpd}</b> · cuotas: <b>${pl.nC}</b> · entregas: <b>${pl.nE}</b></p><p style="color:var(--mut);font-size:13px;margin:0 0 8px">Los proyectos que ya existen (mismo código) se actualizan. Si el archivo trae cuotas o entregas de un proyecto, reemplazan las que tenía. No se elimina nada más.</p>`+(pl.errs.length?`<p style="color:var(--bad);font-weight:600">Errores (${pl.errs.length}). Corrija el archivo y vuelva a cargarlo:</p>`+ul(pl.errs):'')+(pl.warns.length?`<p style="color:var(--warn);font-weight:600">Avisos (${pl.warns.length})</p>`+ul(pl.warns):'');
+ $('#iok').disabled=!!pl.errs.length||!(pl.nNew+pl.nUpd+pl.nC+pl.nE);bk.close();idlg.showModal()}
+async function impX(inp){const f=inp.files[0];inp.value='';if(!f)return;try{IMP=await planImport(f);showPlan()}catch(e){ask('No se pudo leer el archivo: '+(e.message||e),1)}}
+async function applyImp(){const pl=IMP,T=[];$('#iok').disabled=true;
+ for(const it of pl.items){if(it.p)T.push(()=>wr('projects',it.id,it.p));
+  if(it.cuotas){Object.values(CU).filter(c=>c.pid===it.id).forEach(o=>T.push(()=>wr('cuotas',o.id,null)));it.cuotas.forEach(c=>T.push(()=>wr('cuotas',c.id,c)))}
+  if(it.ent){Object.values(EN).filter(c=>c.pid===it.id).forEach(o=>T.push(()=>wr('entregas',o.id,null)));it.ent.forEach(c=>T.push(()=>wr('entregas',c.id,c)))}}
+ QUIET=true;FAILS=0;
+ await pool(T,5,n=>{if(n%10===0||n===T.length)$('#ipv').innerHTML=`<p>Importando… ${n} de ${T.length}</p>`});
+ QUIET=false;idlg.close();
+ ask(FAILS?`La importación terminó con ${FAILS} escrituras fallidas de ${T.length}. Revise los datos y repita la importación si hace falta.`:`Importación completa: ${pl.nNew} proyectos nuevos, ${pl.nUpd} actualizados, ${pl.nC} cuotas y ${pl.nE} entregas.`,1)}
+/* ---- exportar a Excel (mismo formato que se importa) ---- */
+const crcT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+function zipX(files){const te=new TextEncoder(),parts=[],cd=[],w16=v=>[v&255,v>>8&255],w32=v=>[v&255,v>>8&255,v>>16&255,v>>>24&255],ks=Object.keys(files);let off=0;
+ for(const name of ks){const nb=te.encode(name),d=te.encode(files[name]),c=crc32(d);
+  const lh=new Uint8Array([...w32(0x04034b50),...w16(20),...w16(0x0800),...w16(0),...w16(0),...w16(0x21),...w32(c),...w32(d.length),...w32(d.length),...w16(nb.length),...w16(0)]);
+  parts.push(lh,nb,d);cd.push(new Uint8Array([...w32(0x02014b50),...w16(20),...w16(20),...w16(0x0800),...w16(0),...w16(0),...w16(0x21),...w32(c),...w32(d.length),...w32(d.length),...w16(nb.length),...w16(0),...w16(0),...w16(0),...w16(0),...w32(0),...w32(off)]),nb);off+=lh.length+nb.length+d.length}
+ const cl=cd.reduce((s,x)=>s+x.length,0),end=new Uint8Array([...w32(0x06054b50),...w16(0),...w16(0),...w16(ks.length),...w16(ks.length),...w32(cl),...w32(off),...w16(0)]);
+ return new Blob([...parts,...cd,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+const xe=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const xcl=n=>{let s='';n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s};
+const XNS='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',XH='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+function sheetX(rows,dc){return XH+`<worksheet ${XNS}><sheetData>`+rows.map((r,i)=>`<row r="${i+1}">`+r.map((v,j)=>{if(v==null||v==='')return '';const ref=xcl(j)+(i+1);
+ if(i>0&&dc.includes(j)&&/^\d{4}-\d\d-\d\d$/.test(v))return `<c r="${ref}" s="1"><v>${Math.round((Date.parse(v+'T00:00:00Z')-Date.UTC(1899,11,30))/864e5)}</v></c>`;
+ if(typeof v==='number')return `<c r="${ref}"><v>${v}</v></c>`;return `<c r="${ref}" t="inlineStr"${i===0?' s="2"':''}><is><t>${xe(v)}</t></is></c>`}).join('')+'</row>').join('')+'</sheetData></worksheet>'}
+async function saveFile(name,blob){try{const dl=window.claude?await window.claude.use('downloads'):null;if(dl){await dl.save({filename:name,data:blob});return}}catch(e){if(e&&e.code==='declined')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+async function expX(){
+ const D=discs(),P=[['Código','Proyecto','Cliente','Vendedor','Moneda','Estado','Fecha cotización','Fecha venta','Inicio','Plazo (meses)','Comentarios',...D]],Q=[['Código proyecto','Nº cuota','Vence','Monto','Nº factura','Fecha factura','Fecha cobro']],Z=[['Código proyecto','Descripción','Fecha prevista','Fecha entrega real','Observaciones']];
+ S.projects.forEach(p=>{P.push([p.code,p.name,p.client,p.seller,SY[p.cur]||p.cur,p.status,p.qdate,p.sdate,p.start,p.months||null,p.notes,...D.map(d=>sum((p.items||[]).filter(x=>x.d===d),x=>x.a)||null)]);
+  (p.inst||[]).forEach((c,i)=>Q.push([p.code,i+1,c.date,c.amount,c.invNo,c.invDate,c.paidDate]));(p.ent||[]).forEach(e=>Z.push([p.code,e.name,e.date,e.doneDate,e.note]))});
+ const R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',PK='http://schemas.openxmlformats.org/package/2006/relationships';
+ const f={'[Content_Types].xml':XH+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+[1,2,3].map(i=>`<Override PartName="/xl/worksheets/sheet${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>',
+ '_rels/.rels':XH+`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+ 'xl/workbook.xml':XH+`<workbook ${XNS} xmlns:r="${R}"><sheets><sheet name="Proyectos" sheetId="1" r:id="rId1"/><sheet name="Cuotas" sheetId="2" r:id="rId2"/><sheet name="Entregas" sheetId="3" r:id="rId3"/></sheets></workbook>`,
+ 'xl/_rels/workbook.xml.rels':XH+`<Relationships xmlns="${PK}">`+[1,2,3].map(i=>`<Relationship Id="rId${i}" Type="${R}/worksheet" Target="worksheets/sheet${i}.xml"/>`).join('')+`<Relationship Id="rId4" Type="${R}/styles" Target="styles.xml"/></Relationships>`,
+ 'xl/styles.xml':XH+`<styleSheet ${XNS}><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs></styleSheet>`,
+ 'xl/worksheets/sheet1.xml':sheetX(P,[6,7,8]),'xl/worksheets/sheet2.xml':sheetX(Q,[2,5,6]),'xl/worksheets/sheet3.xml':sheetX(Z,[2,3])};
+ await saveFile('gestion-proyectos-'+today+'.xlsx',zipX(f))}
+
+let CC=null,CS='';
+function openC(pid,iid,f){const p=S.projects.find(x=>x.id===pid),i=p.inst.find(x=>x.id===iid);CC={pid,iid};$('#cinfo').textContent=`${p.code||''} ${p.name} · ${p.client} · vence ${i.date} · ${fmtC(i.amount,p.cur)}`;$('#c-no').value=i.invNo||'';$('#c-idate').value=i.invDate||(f==='f'?today:'');$('#c-pdate').value=i.paidDate||(f==='c'?today:'');cdlg.showModal()}
+async function saveC(){const no=$('#c-no').value.trim(),idt=$('#c-idate').value,pd=$('#c-pdate').value;if(pd&&!idt){ask('Registre primero la factura: el cobro requiere fecha de factura.',1);return}cdlg.close();await up('cuotas',CC.iid,{invNo:no,invDate:idt,paidDate:pd,paid:!!pd})}
+function vCob2(L){
+ const I=insts(L).sort((a,b)=>a.date.localeCompare(b.date)),T={'por facturar':i=>!i.invDate,facturada:i=>i.invDate&&!i.paid,vencida:i=>istat(i)==='vencida',cobrada:i=>i.paid},R2=CS?I.filter(T[CS]):I;
+ if(!I.length)return `<div class="card empty">No hay cuotas. Dé de alta una cotización como vendida y defina sus cuotas.</div>`;
+ const sel=`<div class="bar"><select aria-label="Estado de la cuota" onchange="CS=this.value;render()"><option value="">Cuotas: todas</option>${[['por facturar','Por facturar'],['facturada','Facturadas sin cobrar'],['vencida','Vencidas sin cobrar'],['cobrada','Cobradas']].map(([v,l])=>`<option value="${v}" ${CS===v?'selected':''}>${l}</option>`).join('')}</select><span style="color:var(--mut)">Montos en su moneda original; total en ${SY[S.rc]}.</span></div>`;
+ return sel+`<div class="card scroll"><table><thead><tr><th>Vence</th><th>Proyecto</th><th>Cliente</th><th>Disciplina</th><th class="n">Monto</th><th>Factura</th><th>Cobro</th><th></th></tr></thead><tbody>${R2.map(i=>{const a=!i.invDate?'f':!i.paid?'c':'';return `<tr><td>${i.date}</td><td>${esc(i.p.code)} ${esc(i.p.name)}</td><td>${esc(i.p.client)}</td><td>${esc((i.p.items||[]).map(x=>x.d).join(', '))}</td><td class="n">${fmtC(i.amount*share(i.p),i.p.cur)}</td><td>${i.invDate?esc(i.invNo||'s/n')+' · '+i.invDate:`<span class="tag ${i.date<=today?'vencida':'pendiente'}">${i.date<=today?'a facturar':'por facturar'}</span>`}</td><td><span class="tag ${istat(i)}">${istat(i)}</span>${i.paid?' '+i.paidDate:''}</td><td><button class="btn g" onclick="openC('${i.p.id}','${i.id}','${a}')">${a==='f'?'Facturar':a==='c'?'Registrar cobro':'Editar'}</button></td></tr>`}).join('')}</tbody><tfoot><tr><td colspan="4">${R2.length} cuotas</td><td class="n">${fmt(sum(R2,i=>i.amt))}</td><td colspan="3"></td></tr></tfoot></table></div>`}
+(async()=>{try{const c=window.claude;if(!c)return;const db=await c.use('db'),u=await c.use('user');if(!db)return;DB=db;try{RO=(await u?.can('data.write'))===false}catch(e){}
+ try{if(u&&u.canEdit)LIM=!(await u.canEdit())&&!(u.isOwner&&await u.isOwner())}catch(e){}document.body.classList.toggle('lim',LIM);
+ const er=e=>console.error(e);
+ db.collection('projects').onSnapshot(s=>{PR={};s.docs.forEach(d=>PR[d.id]=norm({...d.data()}));rebuild()},er);
+ if(!LIM)db.collection('cuotas').onSnapshot(s=>{CU={};s.docs.forEach(d=>CU[d.id]={...d.data()});rebuild()},er);
+ db.collection('entregas').onSnapshot(s=>{EN={};s.docs.forEach(d=>EN[d.id]={...d.data()});rebuild()},er);
+ db.doc('config/rates').onSnapshot(s=>{if(s.exists){S.rates={...S.rates,...s.data()};render()}},er);
+}catch(e){}})();
+function setView(v){view=v;render()}
+function setF(k,v){F[k]=v;render()}
+function filters(){
+ const sel=(k,l,opts)=>`<select aria-label="${l}" onchange="setF('${k}',this.value)"><option value="">${l}: todos</option>${opts.map(o=>`<option value="${esc(o)}" ${F[k]===o?'selected':''}>${esc(k==='discipline'?dn(o):o)}</option>`).join('')}</select>`;
+ return `<div class="bar">${sel('discipline','Disciplina',discs())}${sel('seller','Vendedor',uniq('seller'))}${sel('client','Cliente',uniq('client'))}${sel('status','Estado',['Cotizada','Vendida','Perdida'])}${sel('entrega','Entrega',['En proceso','Entregado','Sin entregas definidas'])}<button class="btn g" onclick="F={discipline:'',seller:'',client:'',status:'',entrega:''};render()">Limpiar</button><span class="sp"></span>${cfg()}</div>`}
+
+function render(){
+ $('#nav').innerHTML=[['proyectos','Proyectos'],['entregas','Entregas'],['cobranzas','Cobranzas'],['reportes','Reportes']].filter(([k])=>!LIM||k==='proyectos'||k==='entregas').map(([k,l])=>`<button class="${view===k?'on':''}" onclick="setView('${k}')">${l}</button>`).join('');
+ const L=list();
+ $('#app').innerHTML=(RO?'<div class="card">Su acceso es de solo lectura: puede ver los datos pero no modificarlos.</div>':'')+(DB?'':'<div class="card">Modo sin conexión: los datos se guardan solo en este navegador y no se comparten.</div>')+filters()+(S.projects.length?{proyectos:vProy,cobranzas:vCob2,entregas:vEnt,reportes:vRep}[view](L):`<div class="card empty">Todavía no hay cotizaciones. Cree la primera con “Nueva cotización” o cargue datos de ejemplo desde Respaldo.</div>`);
+}
+
+function vProy(L){
+ const body=L.map(p=>{const c=cobrado(p);return `<tr><td>${esc(p.code)}</td><td>${esc(p.name)}</td><td>${esc(p.client)}</td><td>${esc(p.seller)}</td><td>${esc((p.items||[]).map(x=>x.d).join(', '))}</td><td><span class="tag ${p.status}">${p.status}</span></td><td class="n">${fmtC(p.amount*share(p),p.cur)}</td><td class="n">${p.status==='Vendida'?p.months+' m':''}</td>${LIM?'':`<td class="n">${p.status==='Vendida'?Math.round(c/(pa(p)||1)*100)+'%':''}</td>`}<td>${p.entrega?`<span class="tag ${p.entrega.replace(/\s/g,'').toLowerCase()}">${p.entrega}</span>`+(p.ent.length?` ${p.ent.filter(e=>e.doneDate).length}/${p.ent.length}`:''):''}</td><td title="${esc(p.notes)}"><div style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${esc(p.notes)}</div></td><td><button class="btn g" onclick="openForm('${p.id}')">${p.status==='Cotizada'?'Dar de alta':'Editar'}</button></td></tr>`}).join('');
+ return `<div class="card scroll"><table><thead><tr><th>Código</th><th>Proyecto</th><th>Cliente</th><th>Vendedor</th><th>Disciplina</th><th>Estado</th><th class="n">Monto</th><th class="n">Plazo</th>${LIM?'':'<th class="n">Cobrado</th>'}<th>Entrega</th><th>Comentarios</th><th></th></tr></thead><tbody>${body}</tbody><tfoot><tr><td colspan="6">Total (${L.length}), expresado en ${SY[S.rc]}</td><td class="n">${fmt(sum(L,pa))}</td><td colspan="${LIM?4:5}"></td></tr></tfoot></table></div>`}
+
+function vCob(L){
+ const I=insts(L).sort((a,b)=>a.date.localeCompare(b.date));
+ if(!I.length)return `<div class="card empty">No hay cuotas. Dé de alta una cotización como vendida y defina sus cuotas.</div>`;
+ return `<div class="card scroll"><table><thead><tr><th>Vence</th><th>Proyecto</th><th>Cliente</th><th>Vendedor</th><th>Disciplina</th><th class="n">Monto</th><th>Estado</th><th>Cobrada</th></tr></thead><tbody>${I.map(i=>`<tr><td>${i.date}</td><td>${esc(i.p.code)} ${esc(i.p.name)}</td><td>${esc(i.p.client)}</td><td>${esc(i.p.seller)}</td><td>${esc((i.p.items||[]).map(x=>x.d).join(', '))}</td><td class="n">${fmtC(i.amount*share(i.p),i.p.cur)}</td><td><span class="tag ${istat(i)}">${istat(i)}</span></td><td><input type="checkbox" style="width:auto" ${i.paid?'checked':''} aria-label="Cobrada" onchange="payI('${i.p.id}','${i.id}',this.checked)"></td></tr>`).join('')}</tbody></table></div>`}
+function payI(pid,iid,v){const i=S.projects.find(p=>p.id===pid).inst.find(x=>x.id===iid);i.paid=v;i.paidDate=v?today:'';save();render()}
+
+function vRep(L){
+ const V=sold(L),I=insts(L),st=s=>sum(L.filter(p=>p.status===s),pa),nS=V.length,nP=L.filter(p=>p.status==='Perdida').length;
+ const cob=sum(I.filter(i=>i.paid),i=>i.amt),ven=sum(I.filter(i=>istat(i)==='vencida'),i=>i.amt),pen=sum(I.filter(i=>!i.paid),i=>i.amt);
+ const k=(l,v)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
+ const kp=`<p style="color:var(--mut);margin:0 0 8px">Importes en ${SY[S.rc]}, convertidos con las cotizaciones indicadas arriba (valor fijo para todo el período).</p><div class="kpis">${k('Vendido',fmt(st('Vendida')))}${k('En cotización (abierto)',fmt(st('Cotizada')))}${k('Perdido',fmt(st('Perdida')))}${k('Conversión (vendidas / cerradas)',nS+nP?Math.round(nS/(nS+nP)*100)+'%':'–')}${k('Proyectos en proceso (entrega)',V.filter(p=>p.entrega==='En proceso').length)}${k('Proyectos entregados',V.filter(p=>p.entrega==='Entregado').length)}${k('Entregas atrasadas',V.reduce((n,p)=>n+(p.ent||[]).filter(e=>est(e)==='atrasada').length,0))}${k('Facturado',fmt(sum(I.filter(i=>i.invDate),i=>i.amt)))}${k('Facturado sin cobrar',fmt(sum(I.filter(i=>i.invDate&&!i.paid),i=>i.amt)))}${k('Para facturar ya (cuota vencida sin factura)',fmt(sum(I.filter(i=>!i.invDate&&i.date<=today),i=>i.amt)))}${k('Cobrado',fmt(cob))}${k('Por cobrar',fmt(pen))}${k('Vencido',fmt(ven))}</div>`;
+ const brk=(t,key)=>{const g={};V.forEach(p=>{const r=pa(p)?cobrado(p)/pa(p):0;(key==='discipline'?(p.items||[]).filter(x=>!F.discipline||x.d===F.discipline).map(x=>[x.d,conv(x.a,p.cur)]):[[p[key],pa(p)]]).forEach(([k,v])=>{const o=g[k||'(sin dato)']??={v:0,c:0};o.v+=v;o.c+=v*r})});
+  const e=Object.entries(g).sort((a,b)=>b[1].v-a[1].v),mx=Math.max(1,...e.map(x=>x[1].v));
+  return `<div class="card scroll"><h2>Vendido por ${t}</h2><table><thead><tr><th>${t[0].toUpperCase()+t.slice(1)}</th><th class="n">Vendido</th><th class="n">Cobrado</th><th class="n">Pendiente</th><th></th></tr></thead><tbody>${e.map(([n,o])=>`<tr><td>${esc(key==='discipline'?dn(n):n)}</td><td class="n">${fmt(o.v)}</td><td class="n">${fmt(o.c)}</td><td class="n">${fmt(o.v-o.c)}</td><td><div class="meter"><i style="width:${o.v/mx*100}%"></i></div></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Sin ventas</td></tr>'}</tbody></table></div>`};
+ // flujo de caja mensual por vencimiento
+ const m={};I.forEach(i=>{const k=i.date.slice(0,7),o=m[k]??={c:0,p:0,v:0};o[i.paid?'c':istat(i)==='vencida'?'v':'p']+=i.amt});
+ const ks=Object.keys(m).sort(),mx=Math.max(1,...ks.map(x=>m[x].c+m[x].p+m[x].v));
+ const ch=ks.length?`<div class="leg"><span><i style="background:var(--ok)"></i>Cobrado</span><span><i style="background:var(--bad)"></i>Vencido</span><span><i style="background:var(--warn)"></i>Por cobrar</span></div><div class="scroll"><div class="chart">${ks.map(x=>{const o=m[x],h=v=>v/mx*150;return `<div class="col" title="${x}: ${fmt(o.c+o.p+o.v)}"><span>${fmt((o.c+o.p+o.v)/1000)}k</span><div class="stk"><i style="height:${h(o.c)}px;background:var(--ok)"></i><i style="height:${h(o.v)}px;background:var(--bad)"></i><i style="height:${h(o.p)}px;background:var(--warn)"></i></div><span>${x.slice(2)}</span></div>`}).join('')}</div></div>`:'<div class="empty">Sin cuotas para proyectar</div>';
+ const tb=`<table><thead><tr><th>Mes</th><th class="n">Cobrado</th><th class="n">Vencido</th><th class="n">Por cobrar</th><th class="n">Total</th></tr></thead><tbody>${ks.map(x=>`<tr><td>${x}</td><td class="n">${fmt(m[x].c)}</td><td class="n">${fmt(m[x].v)}</td><td class="n">${fmt(m[x].p)}</td><td class="n">${fmt(m[x].c+m[x].v+m[x].p)}</td></tr>`).join('')}</tbody></table>`;
+ return kp+`<div class="card"><h2>Flujo de caja por mes de vencimiento</h2>${ch}<div class="scroll" style="margin-top:10px">${tb}</div></div><div class="grid">${brk('disciplina','discipline')}${brk('vendedor','seller')}${brk('cliente','client')}</div>`}
+
+/* ---- formulario ---- */
+function openForm(id){
+ cur=id?S.projects.find(p=>p.id===id):null;const p=cur||{};
+ $('#dt').textContent=cur?'Editar '+(p.code||'proyecto'):'Nueva cotización';
+ const set=(k,v)=>$('#f-'+k).value=v??'';
+ set('code',p.code);set('notes',p.notes);set('name',p.name);set('client',p.client);set('seller',p.seller);set('cur',p.cur||'UYU');items=(p.items||[]).map(x=>({...x}));if(!items.length)items=[{d:'',a:0}];drawItems();set('qdate',p.qdate||today);set('status',p.status||'Cotizada');
+ set('sdate',p.sdate||today);set('start',p.start||today);set('months',p.months||3);set('n',(p.inst||[]).length||3);set('first',(p.inst&&p.inst[0]?.date)||addM(today,1));set('step',1);
+ rows=(p.inst||[]).map(i=>({...i}));erows=(p.ent||[]).map(x=>({...x}));$('#e-n').value=erows.length||2;$('#e-first').value=(erows[0]&&erows[0].date)||addM(p.start||today,1);$('#e-step').value=1;
+ $('#dl-c').innerHTML=uniq('client').map(x=>`<option value="${esc(x)}">`).join('');
+ $('#dl-s').innerHTML=uniq('seller').map(x=>`<option value="${esc(x)}">`).join('');
+ $('#dl-d').innerHTML=discs().map(x=>`<option value="${esc(x)}">${esc(dn(x))}</option>`).join('');
+ $('#del').style.display=cur&&!LIM?'':'none';togSold();dlg.showModal()}
+function togSold(){const v=$('#f-status').value==='Vendida';$('#sold').hidden=!v;if(v&&!rows.length&&!LIM)gen();else drawRows();drawE()}
+async function gen(){
+ const a=+$('#f-amount').value||0,n=Math.max(1,+$('#f-n').value||1),st=Math.max(1,+$('#f-step').value||1),f=$('#f-first').value||addM(today,1);
+ if(rows.some(r=>r.invDate||r.paid)&&!await ask('Hay cuotas facturadas o cobradas que se reemplazarán. ¿Continuar?'))return;const q=Math.floor(a/n*100)/100;
+ rows=Array.from({length:n},(_,i)=>({id:uid(),date:addM(f,i*st),amount:i===n-1?Math.round((a-q*(n-1))*100)/100:q,paid:false,paidDate:''}));drawRows()}
+let items=[];
+function drawItems(){$('#items').innerHTML=items.map((x,i)=>`<tr><td><input list="dl-d" value="${esc(x.d)}" placeholder="Disciplina (AT, DI, EX...)" oninput="items[${i}].d=this.value"></td><td><input type="number" step="any" min="0" value="${x.a}" style="text-align:right" oninput="items[${i}].a=+this.value;itTot()"></td><td><button type="button" class="btn g" onclick="items.splice(${i},1);drawItems()" aria-label="Quitar disciplina">✕</button></td></tr>`).join('');itTot()}
+function itTot(){$('#f-amount').value=sum(items,x=>+x.a||0);tot()}
+function addRow(){const l=rows[rows.length-1];rows.push({id:uid(),date:l?addM(l.date,1):addM(today,1),amount:0,paid:false,paidDate:''});drawRows()}
+function drawRows(){
+ $('#rows').innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td><input type="date" value="${r.date}" onchange="rows[${i}].date=this.value"></td><td><input type="number" step="any" value="${r.amount}" style="text-align:right" oninput="rows[${i}].amount=+this.value;tot()"></td><td>${fst(r)}</td><td><button type="button" class="btn g" onclick="rows.splice(${i},1);drawRows()" aria-label="Quitar cuota">✕</button></td></tr>`).join('');tot()}
+function tot(){const s=sum(rows,r=>+r.amount||0),a=+$('#f-amount').value||0;$('#sum').textContent=`Suma de cuotas: ${fmt(s)} de ${fmt(a)}${Math.abs(s-a)>0.01?' (no coincide con el monto)':''}`}
+async function saveForm(){
+ const g=k=>$('#f-'+k).value.trim(),status=g('status'),amount=+g('amount');
+ if(!g('name')||!g('client')||!(amount>0)||items.some(x=>+x.a>0&&!String(x.d).trim())){ask('Complete nombre, cliente y al menos una disciplina con monto mayor a 0.',1);return}
+ if(status==='Vendida'&&!LIM){if(!rows.length){ask('Defina al menos una cuota.',1);return}
+  if(Math.abs(sum(rows,r=>+r.amount||0)-amount)>0.01&&!await ask('La suma de cuotas no coincide con el monto. ¿Guardar igual?'))return}
+ const p={id:cur?.id||uid(),code:g('code'),name:g('name'),client:g('client'),seller:g('seller'),notes:g('notes'),discipline:(items[0]?.d||'').trim(),cur:g('cur'),items:items.filter(x=>String(x.d).trim()&&+x.a>0).map(x=>({d:String(x.d).trim(),a:+x.a})),amount,qdate:g('qdate'),status,
+  sdate:status==='Vendida'?g('sdate'):'',start:status==='Vendida'?g('start'):'',months:status==='Vendida'?+g('months')||1:0};
+ if(status==='Vendida'&&erows.some(r=>!r.date)){ask('Complete la fecha prevista de todas las entregas.',1);return}commitForm(p,status==='Vendida'&&!LIM?rows:[],status==='Vendida'?erows.map(r=>({...r,name:(r.name||'').trim()||'Entrega'})):[]);dlg.close()}
+async function delPrj(){if(cur&&await ask('¿Eliminar este proyecto y sus cuotas?')){const c=cur;dlg.close();(async()=>{for(const i of c.inst)await wr('cuotas',i.id,null);for(const e of c.ent||[])await wr('entregas',e.id,null);await wr('projects',c.id,null)})()}}
+
+/* ---- respaldo ---- */
+function openBk(){bt.value=JSON.stringify(S,null,1);bk.showModal()}
+function csv(){const h='codigo,proyecto,cliente,vendedor,disciplina,vence,monto,moneda,estado,factura,fecha_factura,fecha_cobro';const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+ return [h,...insts(S.projects).map(i=>[i.p.code,i.p.name,i.p.client,i.p.seller,(i.p.items||[]).map(x=>x.d).join('+'),i.date,i.amount,i.p.cur,istat(i),i.invNo||'',i.invDate||'',i.paidDate||''].map(q).join(','))].join('\n')}
+async function impLocal(){try{const d=JSON.parse(localStorage.getItem(K));if(!d?.projects?.length)throw 0;if(!await ask('Se copiarán a la base compartida '+d.projects.length+' proyectos guardados en este navegador. ¿Continuar?'))return;(async()=>{for(const p of d.projects)await savePrj(p)})();bk.close()}catch(e){ask('No hay datos locales en este navegador.',1)}}
+async function imp(){try{const d=JSON.parse(bt.value);if(!Array.isArray(d.projects))throw 0;if(!await ask('Se agregarán o actualizarán los proyectos del JSON. ¿Continuar?'))return;(async()=>{for(const p of d.projects)await savePrj(p)})();bk.close()}catch(e){ask('El texto pegado no es un respaldo JSON válido.',1)}}
+async function demo(){
+ if(S.projects.length&&!await ask('Se agregarán proyectos de ejemplo a los existentes. ¿Continuar?'))return;
+ const mk=(code,name,client,seller,discipline,amount,status,n,off)=>{const p={id:uid(),code,name,client,seller,discipline,amount,qdate:addM(today,-4),status,sdate:'',start:'',months:0,inst:[],notes:code==='P-002'?'Cliente pide entregas parciales por piso.':'',cur:code==='P-002'?'USD':code==='P-003'?'UI':'UYU',items:[{d:discipline,a:Math.round(amount*.7)},{d:'CER',a:amount-Math.round(amount*.7)}]};
+  if(status==='Vendida'){p.sdate=addM(today,off);p.start=p.sdate;p.months=n*2;p.ent=[1,2,3].map(k=>({id:uid(),name:'Entrega '+k,date:addM(p.sdate,k*2),doneDate:addM(p.sdate,k*2)<today?addM(p.sdate,k*2):'',note:''}));p.inst=Array.from({length:n},(_,i)=>({id:uid(),date:addM(p.sdate,i+1),amount:Math.round(amount/n),paid:addM(p.sdate,i+1)<today,paidDate:addM(p.sdate,i+1)<today?addM(p.sdate,i+1):'',invNo:'A-'+(i+1),invDate:addM(p.sdate,i+1)<=today?addM(p.sdate,i+1):''}))}
+  return p};
+ (async()=>{for(const p of [mk('P-001','Cálculo estructural galpón','Agroindustria Sur','Lucía','AT',48000,'Vendida',4,-4),mk('P-002','Proyecto eléctrico planta','Lácteos del Plata','Martín','DI',62000,'Vendida',5,-2),mk('P-003','Red sanitaria barrio','Constructora Norte','Lucía','CD',27000,'Vendida',3,-1),mk('P-004','Anteproyecto civil puerto','Logística Este','Martín','EX',90000,'Cotizada',0,0),mk('P-005','Ingeniería de proceso','Lácteos del Plata','Lucía','DO',35000,'Perdida',0,0)])await savePrj(p)})();
+ save();render();bk.close()}
+render();
+</script></body></html>

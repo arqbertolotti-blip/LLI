@@ -1,0 +1,66 @@
+﻿GESTION DE PROYECTOS - INSTALACION EN UNA RED LOCAL (WINDOWS)
+===========================================================
+
+Necesita una PC de la oficina que quede siempre encendida (la llamaremos "el servidor").
+Las demas PC solo usan el navegador (Chrome, Edge, Firefox).
+
+PASO 1 - Instalar Node.js (una sola vez, en el servidor)
+  - Descargue la version LTS desde https://nodejs.org e instalela con las opciones por defecto
+    (deje marcada la opcion "Add to PATH").
+
+PASO 2 - Copiar los archivos
+  - Descomprima el ZIP en una carpeta simple, por ejemplo  C:\gestion-proyectos
+    (evite el Escritorio, Documentos y carpetas sincronizadas con OneDrive).
+
+PASO 3 - Configurar usuarios y claves
+  - Abra config.bat con el Bloc de notas y cambie la linea APP_USERS.
+    Formato:  usuario:clave:rol,usuario2:clave2:rol
+    Rol  total     = acceso a todo.
+    Rol  limitado  = solo Proyectos y Entregas (con edicion). No ve cobranzas ni reportes.
+    Si omite el rol, queda como total.
+    No use los caracteres  %  :  ,  ni comillas dentro de las claves. Use claves largas.
+
+PASO 4 - Probar
+  - Haga doble clic en iniciar.bat. Aparece una ventana negra con las direcciones, por ejemplo:
+        Desde otras PC:     http://192.168.1.20:3000
+  - Abra esa direccion en el navegador del servidor y entre con un usuario y clave.
+
+PASO 5 - Permitir el acceso desde las otras PC
+  - Clic derecho sobre abrir-firewall.bat - "Ejecutar como administrador".
+    (Abre el puerto solo para equipos de la red local.)
+  - Desde otra PC de la oficina, abra la direccion "Desde otras PC" del paso 4.
+
+PASO 6 - Que arranque solo al encender el equipo (recomendado)
+  - Cierre la ventana de iniciar.bat.
+  - Clic derecho sobre instalar-inicio-automatico.bat - "Ejecutar como administrador".
+    Esto crea el arranque automatico y un respaldo diario a las 23:00.
+  - Para arrancarlo sin reiniciar, abra una ventana de cmd como administrador y ejecute:
+        schtasks /run /tn "Gestion de proyectos"
+  - Reinicie el equipo y verifique que la direccion responde desde otra PC.
+
+RECOMENDACIONES
+  - Reserve una IP fija para el servidor en el router (reserva DHCP), asi la direccion no cambia.
+  - Respaldos: se guardan en la carpeta backups (los ultimos 30). Copie esa carpeta de vez en
+    cuando a otro equipo, disco externo o nube: si se rompe el servidor, ahi estan sus datos.
+  - Respaldo manual: doble clic en respaldo.bat.
+  - Los datos viven en data\data.json. Tambien puede usar Respaldo dentro de la aplicacion.
+  - Para cambiar usuarios o claves: edite config.bat y reinicie el servidor
+    (o reinicie el equipo).
+  - Registro de actividad y errores: carpeta logs\servidor.log
+
+PROBLEMAS FRECUENTES
+  - "node no se reconoce": reinstale Node.js, reinicie el equipo y vuelva a intentar.
+  - No abre desde otra PC: verifique que ejecuto abrir-firewall.bat como administrador, que la
+    direccion IP es la correcta y que ambas PC estan en la misma red.
+  - "Puerto en uso": cambie PORT en config.bat (por ejemplo a 3001) y vuelva a ejecutar
+    abrir-firewall.bat.
+  - Si el antivirus bloquea node.exe, agregue una excepcion para la carpeta del programa.
+
+IMPORTANTE
+  - Esta instalacion es para uso dentro de la red de la oficina. No la exponga a Internet sin HTTPS.
+  - Hay dos roles (total y limitado). No hay registro de quien hizo cada cambio.
+  - Importar/Exportar Excel: menu Respaldo de la aplicacion. Use planilla-importacion.xlsx como modelo.
+
+DESINSTALAR
+  - Ejecute quitar-inicio-automatico.bat como administrador y luego borre la carpeta.
+    (Guarde antes una copia de data\data.json.)
